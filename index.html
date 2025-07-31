@@ -7,8 +7,13 @@
     <title>Sistema Hidrológico y Meteorológico de Quito</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" rel="stylesheet" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
-    <link href="styles/main.css" rel="stylesheet" />
-    <link href="styles/chatbot.css" rel="stylesheet" />
+    <link href="./styles/main.css" rel="stylesheet" />
+    <link href="./styles/chatbot.css" rel="stylesheet" />
+    <link rel="manifest" href="./manifest.json">
+    <link rel="icon" href="./assets/favicon.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="./assets/favicon.ico" type="image/x-icon">
+    <link rel="apple-touch-icon" href="./assets/apple-touch-icon.png">
+    <meta name="theme-color" content="#2563eb">
 </head>
 
 <body>
@@ -224,7 +229,12 @@
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-    <script type="module" src="src/main.js"></script>
+    <script type="module" src="./src/main.js"></script>
+    <script>
+        if ("serviceWorker" in navigator) {
+            navigator.serviceWorker.register("./sw.js");
+        }
+    </script>
 </body>
 
 </html>
