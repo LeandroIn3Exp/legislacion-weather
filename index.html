@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Sistema Hidrológico y Meteorológico de Quito</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+    <link href="styles/main.css" rel="stylesheet" />
+    <link href="styles/chatbot.css" rel="stylesheet" />
+</head>
+
+<body>
+    <div class="container">
+        <!-- Encabezado -->
+        <div class="header">
+            <h1><i class="fas fa-tint"></i> Sistema Hidrológico y Meteorológico de Quito</h1>
+            <p>Análisis inteligente con OpenWeather y Gemini AI para gestión hídrica urbana</p>
+            <div class="status-bar">
+                <div class="status-indicator status-error" id="weather-status">
+                    <i class="fas fa-cloud"></i> Clima: Desconectado
+                </div>
+                <div class="status-indicator status-error" id="gemini-status">
+                    <i class="fas fa-robot"></i> Gemini: Desconectado
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel de configuración -->
+        <div class="dashboard">
+            <div class="card">
+                <h3><i class="fas fa-key"></i> Configuración APIs</h3>
+                <div class="input-group">
+                    <label for="openweather-key">OpenWeather API Key:</label>
+                    <input id="openweather-key" placeholder="Tu API Key de OpenWeather" type="password" />
+                </div>
+                <div class="input-group">
+                    <label for="gemini-key">Gemini API Key:</label>
+                    <input id="gemini-key" placeholder="Tu API Key de Gemini" type="password" />
+                </div>
+                <button class="btn" id="connect-apis-btn">
+                    <i class="fas fa-plug"></i> Conectar APIs
+                </button>
+                <button class="btn btn-secondary" id="diagnose-gemini-btn" style="margin-top: 10px;">
+                    <i class="fas fa-stethoscope"></i> Diagnosticar Gemini
+                </button>
+            </div>
+
+            <div class="card">
+                <h3><i class="fas fa-upload"></i> Cargar Datos CSV</h3>
+                <div class="input-group">
+                    <label for="csv-file">Archivo CSV de datos hidrológicos:</label>
+                    <input accept=".csv" id="csv-file" type="file" />
+                </div>
+                <div class="input-group">
+                    <label for="csv-preview">Vista previa de datos:</label>
+                    <textarea id="csv-preview" placeholder="Los datos del CSV aparecerán aquí..." readonly
+                        rows="4"></textarea>
+                </div>
+                <button class="btn btn-secondary" id="analyze-csv-btn">
+                    <i class="fas fa-chart-line"></i> Analizar Datos
+                </button>
+            </div>
+        </div>
+
+        <!-- Mapa interactivo -->
+        <div class="card full-width">
+            <h3><i class="fas fa-map"></i> Mapa Interactivo - Plantas Potabilizadoras y Clima</h3>
+            <div class="map-container" id="map"></div>
+            <div class="data-source">
+                <strong>Fuentes de datos:</strong>
+                Ubicaciones de plantas: EPMAPS (39 plantas potabilizadoras en DMQ) |
+                Datos meteorológicos: OpenWeather API |
+                Predicciones: Análisis con Gemini AI
+            </div>
+        </div>
+
+        <!-- Clima actual -->
+        <div class="card full-width">
+            <h3><i class="fas fa-thermometer-half"></i> Clima Actual y Pronóstico</h3>
+            <div class="weather-card" id="weather-info">
+                <div class="weather-current">
+                    <div>
+                        <div class="weather-temp" id="current-temp">--°C</div>
+                        <div id="current-desc">Cargando...</div>
+                        <div id="current-location">Quito, Ecuador</div>
+                    </div>
+                    <div>
+                        <i class="fas fa-cloud fa-4x" id="weather-icon"></i>
+                    </div>
+                </div>
+                <div class="weather-details">
+                    <div class="weather-item">
+                        <div><i class="fas fa-eye"></i></div>
+                        <div id="visibility">-- km</div>
+                        <div>Visibilidad</div>
+                    </div>
+                    <div class="weather-item">
+                        <div><i class="fas fa-tint"></i></div>
+                        <div id="humidity">--%</div>
+                        <div>Humedad</div>
+                    </div>
+                    <div class="weather-item">
+                        <div><i class="fas fa-wind"></i></div>
+                        <div id="wind-speed">-- km/h</div>
+                        <div>Viento</div>
+                    </div>
+                    <div class="weather-item">
+                        <div><i class="fas fa-thermometer"></i></div>
+                        <div id="feels-like">--°C</div>
+                        <div>Sensación</div>
+                    </div>
+                </div>
+                <div class="forecast-grid" id="forecast"></div>
+                <div class="data-source">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>Fuente:</strong> OpenWeather API - Datos meteorológicos en tiempo real para Quito, Ecuador
+                </div>
+            </div>
+        </div>
+
+        <!-- Plantas potabilizadoras -->
+        <div class="card full-width">
+            <h3><i class="fas fa-industry"></i> Principales Plantas Potabilizadoras de Quito</h3>
+            <div class="plants-grid" id="plants-container">
+                <!-- Contenido dinámico desde map.js -->
+            </div>
+        </div>
+
+        <!-- Chat con Gemini AI -->
+        <div class="chat-container">
+            <h3><i class="fas fa-comments"></i> Consulta con Gemini AI</h3>
+            <div class="chat-messages" id="chat-messages">
+                <!-- Mensajes dinámicos desde gemini.js -->
+            </div>
+            <div class="input-group">
+                <textarea id="user-message"
+                    placeholder="Pregunta sobre clima, gestión del agua, riesgos de inundación, etc."
+                    rows="3"></textarea>
+            </div>
+            <button class="btn" id="send-message-btn">
+                <i class="fas fa-paper-plane"></i> Enviar Consulta
+            </button>
+            <button class="btn btn-secondary" id="generate-report-btn">
+                <i class="fas fa-exclamation-triangle"></i> Generar Reporte de Alertas
+            </button>
+        </div>
+
+        <!-- Panel de alertas -->
+        <div class="alerts-panel">
+            <h3><i class="fas fa-exclamation-triangle"></i> Sistema de Alertas - Quito</h3>
+            <div id="alerts-content">
+                <div class="alert-item">
+                    <strong>Estado del Sistema:</strong> Esperando conexión con APIs para generar alertas
+                    personalizadas.
+                </div>
+            </div>
+        </div>
+
+        <!-- Alertas comunitarias -->
+        <section id="alertas" style="padding: 2rem;">
+            <h2 style="font-size: 1.8rem; color: #2c3e50; margin-bottom: 1rem;">📢 Alertas Comunitarias</h2>
+
+            <form id="alertForm"
+                style="background: #f8f9fa; padding: 1rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 2rem;">
+                <div style="margin-bottom: 1rem;">
+                    <label for="zona" style="display: block; font-weight: bold;">📍 Zona afectada:</label>
+                    <input type="text" id="zona" name="zona" required
+                        style="width: 100%; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px;">
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <label for="descripcion" style="display: block; font-weight: bold;">💬 Descripción:</label>
+                    <textarea id="descripcion" name="descripcion" required rows="3"
+                        style="width: 100%; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px;"></textarea>
+                </div>
+                <button type="submit"
+                    style="background-color: #27ae60; color: white; padding: 0.6rem 1.2rem; border: none; border-radius: 4px; font-weight: bold;">Reportar
+                    Alerta</button>
+            </form>
+
+            <div id="alertasFeed"></div>
+        </section>
+
+        <!-- Emergencia ECU 911 -->
+        <div class="card full-width emergency-card">
+            <h3><i class="fas fa-bullhorn"></i> 🚨 Emergencia - ECU 911</h3>
+            <p>¿No puedes hacer una llamada desde tu computador? Usa una de estas opciones alternativas para reportar
+                una emergencia en Quito.</p>
+
+            <div class="emergency-options">
+                <a href="tel:911" class="emergency-call">📞 Llamar al 911</a>
+                <button id="emergency-toggle-btn" class="emergency-toggle">
+                    💬 Otras formas de contacto
+                </button>
+            </div>
+
+            <div id="emergency-panel" class="emergency-panel">
+                <ul>
+                    <li>📧 <strong>Email:</strong> <a href="mailto:contacto@ecu911.gob.ec">contacto@ecu911.gob.ec</a>
+                    </li>
+                    <li>🌐 <strong>Chat en línea:</strong> <a href="https://www.ecu911.gob.ec"
+                            target="_blank">www.ecu911.gob.ec</a></li>
+                    <li>📷 <strong>Redes sociales:</strong> Twitter/X: <a href="https://twitter.com/ECU911Quito"
+                            target="_blank">@ECU911Quito</a></li>
+                    <li>📍 <strong>Ubicación:</strong> Usa Google Maps y copia tu ubicación para enviarla</li>
+                </ul>
+
+                <button id="copy-emergency-btn" class="copy-btn">
+                    📋 Copiar mensaje de emergencia
+                </button>
+
+                <p id="emergency-copy-message" class="copy-message">
+                    ✅ Mensaje copiado al portapapeles.
+                </p>
+            </div>
+        </div>
+
+        <!-- Loading spinner -->
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Procesando con inteligencia artificial...</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+    <script type="module" src="src/main.js"></script>
+</body>
+
+</html>
